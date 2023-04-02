@@ -1,0 +1,79 @@
+GET http://localhost:3003/api/blogs
+
+###
+POST http://localhost:3003/api/blogs HTTP/1.1
+content-type: application/json
+
+{
+    "title": "test2",
+    "author": "John doe2",
+    "url": "fakeurl2.ssss",
+    "likes": 23
+}
+
+###
+GET http://localhost:3003/api/users
+
+###
+POST http://localhost:3003/api/users HTTP/1.1
+content-type: application/json
+
+{
+    "username": "fakefake2",
+    "name": "fakefake",
+    "password": "1234"
+}
+
+###
+post http://localhost:3003/api/login
+content-type: application/json
+
+{
+    "username": "fakefake2",
+    "password": "1234"
+}
+
+###
+POST http://localhost:3003/api/blogs HTTP/1.1
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNhbnQgZGVsZXRlIiwiaWQiOiI2M2Y4YjA0ZDg3MDNhYTUxNTRmMjliZGIiLCJpYXQiOjE2NzcyNDI2NTB9.SKdA59_SwFFxw3k1uEJF94xbxjGk14IyKxP0NiZSgo0
+
+{
+    "title": "To 4444434344",
+    "author": "John doe2",
+    "url": "fakeurl2.ssss",
+    "likes": 23
+}
+
+###
+POST http://localhost:3003/api/users HTTP/1.1
+content-type: application/json
+
+{
+    "username": "cant delete",
+    "name": "fakefake",
+    "password": "1234"
+}
+
+###
+post http://localhost:3003/api/login
+content-type: application/json
+
+{
+    "username": "cant delete",
+    "password": "1234"
+}
+
+### SHOULD FAIL
+delete http://localhost:3003/api/blogs/63e66005a9b4e751c4f2b228
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNhbnQgZGVsZXRlIiwiaWQiOiI2M2U2NWIyYjVkYTljYTViZDczY2ZiZjgiLCJpYXQiOjE2NzYwNDIyNTV9.o9J1SGgZPlxyhbLE7dvTBWc2FoCyUcFEpCWj4IKyFVY
+
+
+### SHOULD PASS
+delete http://localhost:3003/api/blogs/63e663bf63be56fc3f081fa4
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha2VmYWtlMiIsImlkIjoiNjNlNTBiM2NhYTM1NjJkMWJmODM1ZjczIiwiaWF0IjoxNjc2MDQzMTg4fQ.cuXez2MVRQk5Hck5S4iyyfWG6W_UDIPkZgl7AKJEF0Q
+
+
+
