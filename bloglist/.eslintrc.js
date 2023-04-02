@@ -4,23 +4,17 @@ module.exports = {
     commonjs: true,
     es2021: true,
     jest: true,
-    'cypress/globals': true,
+    "cypress/globals": true,
   },
-  extends: 'airbnb-base',
-  overrides: [
-  ],
+  extends: "airbnb-base",
+  overrides: [],
   parserOptions: {
-    ecmaVersion: 'latest',
+    ecmaVersion: "latest",
   },
-  plugins: [
-    'react', 'jest', 'cypress',
-  ],
+  plugins: ["react", "jest", "cypress"],
   rules: {
-    'linebreak-style': 0,
-    semi: [
-      'error',
-      'never',
-    ],
-    'no-console': 0,
+    "linebreak-style": 0,
+    semi: ["error", "never"],
+    "no-console": 0,
   },
-}
+};
