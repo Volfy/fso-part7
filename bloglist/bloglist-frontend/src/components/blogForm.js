@@ -1,18 +1,18 @@
-import { useState } from "react";
-import PropTypes from "prop-types";
+import { useState } from 'react'
+import PropTypes from 'prop-types'
 
 const BlogForm = ({ addNewBlog, messager }) => {
-  const [newBlog, setNewBlog] = useState({ title: "", author: "", url: "" });
+  const [newBlog, setNewBlog] = useState({ title: '', author: '', url: '' })
 
   const addBlog = (e) => {
-    e.preventDefault();
+    e.preventDefault()
     if (newBlog.title && newBlog.url && newBlog.author) {
-      addNewBlog(newBlog);
-      setNewBlog({ title: "", author: "", url: "" });
+      addNewBlog(newBlog)
+      setNewBlog({ title: '', author: '', url: '' })
     } else {
-      messager("Missing fields", 1);
+      messager('Missing fields', 1)
     }
-  };
+  }
 
   return (
     <form onSubmit={addBlog}>
@@ -56,12 +56,12 @@ const BlogForm = ({ addNewBlog, messager }) => {
         Create
       </button>
     </form>
-  );
-};
+  )
+}
 
 BlogForm.propTypes = {
   addNewBlog: PropTypes.func.isRequired,
   messager: PropTypes.func.isRequired,
-};
+}
 
-export default BlogForm;
+export default BlogForm
