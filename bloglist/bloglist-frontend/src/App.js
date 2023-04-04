@@ -8,9 +8,10 @@ import Notif from './components/Notif'
 import loginService from './services/login'
 import blogService from './services/blogs'
 import { useNotify } from './NotifContext'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
+  const queryClient = useQueryClient()
   const [user, setUser] = useState(null)
   const messager = useNotify()
 
@@ -41,63 +42,72 @@ const App = () => {
 
   const blogFormRef = useRef()
 
-  const addNewBlog = async (blogObject) => {
-    blogFormRef.current.toggleVisibility()
-    try {
-      const blog = await blogService.addNew(blogObject, user)
-      setBlogs(
-        blogs.concat({
-          ...blogObject,
-          user: blog.user,
-          likes: blog.likes,
-          id: blog.id,
-        })
-      )
-      messager(`Blog ${blog.title} by ${blog.author} added`, 0)
-    } catch (e) {
-      messager('Unable to add new blog', 1)
+  const blogResult = useQuery(
+    'blogs',
+    blogService.getAll,
+    {
+      refetchOnWindowFocus: false,
     }
-  }
-
-  const updateLikes = async (blogObject) => {
-    const { user: _, ...blogToUpdate } = {
-      ...blogObject,
-      userId: blogObject.user.id,
-      likes: blogObject.likes + 1,
+  )
+  
+  const newBlogMutation = useMutation(
+    blogService.addNew,
+    {
+      onSuccess: (newBlog) => {
+        const blogs = queryClient.getQueryData('blogs')
+        queryClient.setQueryData('blogs', blogs.concat(newBlog))
+        messager(`Blog ${newBlog.title} by ${newBlog.author} added`, 0)
+      },
+      onError: () => messager('Unable to add blog', 1)
     }
-
-    try {
-      const blog = await blogService.updateBlog(blogToUpdate)
-      setBlogs(blogs.map((b) => (b.id === blogObject.id ? blog : b)))
-      messager(`Liked ${blog.title} by ${blog.author}`, 0)
-    } catch (e) {
-      messager('Unable to like blog', 1)
+  )
+  const updateBlogMutation = useMutation(
+    blogService.updateBlog,
+    {
+      onSuccess: (updatedBlog) => {
+        const blogs = queryClient.getQueryData('blogs')
+        queryClient.setQueryData('blogs', blogs.map(b => b.id === updatedBlog.id ? updatedBlog : b))
+        messager(`Liked blog ${updatedBlog.title} by ${updatedBlog.author}`, 0)
+      },
+      onError: () => messager('Unable to like blog', 1)
     }
-  }
-
-  const deleteBlog = async (blog, passedUser) => {
-    try {
-      await blogService.deleteBlog(blog.id, passedUser)
-      setBlogs(blogs.filter((b) => b.id !== blog.id))
-      messager(`Deleted ${blog.title} by ${blog.author}`)
-    } catch (e) {
-      messager('Unable to delete blog', 1)
+  )
+  const deleteBlogMutation = useMutation(
+    blogService.deleteBlog,
+    {
+      onSuccess: (deletedId) => {
+        const blogs = queryClient.getQueryData('blogs')
+        const deletedBlog = blogs.filter(b => b.id === deletedId)[0]
+        queryClient.setQueryData('blogs', blogs.filter(b => b.id !== deletedId))
+        messager(`Deleted blog ${deletedBlog.title} by ${deletedBlog.author}`, 0)
+      },
+      onError: () => messager('Unable to delete blog', 1)
     }
-  }
-
-  const blogForm = () => (
-    <Togglable
-      buttonLabel="add blog"
-      idName="show-blog-form-btn"
-      ref={blogFormRef}
-    >
-      <BlogForm addNewBlog={addNewBlog} messager={messager} />
-    </Togglable>
   )
 
-  const blogDisplay = (passedBlogs) => (
+  const addNewBlog = (newBlog) => {
+    blogFormRef.current.toggleVisibility()
+    newBlogMutation.mutate({newBlog, user})
+  }
+  const updateLikes = (blog) => {
+    updateBlogMutation.mutate({...blog, likes: blog.likes + 1})
+  }
+  const deleteBlog = (blog) => {
+    const blogId = blog.id
+    deleteBlogMutation.mutate({blogId, user})
+  }
+
+  const blogDisplay = () => {
+    if (blogResult.isLoading) {
+      return <div>Blogs are loading...</div>
+    }
+    if (blogResult.isError) {
+      return <div>Error getting blogs</div>
+    }
+    const blogs = blogResult.data
+    return (
     <div className="bloglist">
-      {passedBlogs
+      {blogs
         .sort((a, b) => b.likes - a.likes)
         .map((blog) => (
           <Blog
@@ -109,6 +119,16 @@ const App = () => {
           />
         ))}
     </div>
+  )}
+
+  const blogForm = () => (
+    <Togglable
+      buttonLabel="add blog"
+      idName="show-blog-form-btn"
+      ref={blogFormRef}
+    >
+      <BlogForm addNewBlog={addNewBlog} messager={messager} />
+    </Togglable>
   )
 
   // effects
@@ -118,11 +138,6 @@ const App = () => {
     if (loggedInUser) {
       setUser(JSON.parse(loggedInUser))
     }
-  }, [])
-
-  /// should this be done only after login?
-  useEffect(() => {
-    blogService.getAll().then((rcvdBlogs) => setBlogs(rcvdBlogs))
   }, [])
 
   // returns
@@ -149,7 +164,7 @@ const App = () => {
         <Notif />
         {blogForm()}
       </div>
-      {blogDisplay(blogs)}
+      {blogDisplay()}
     </div>
   )
 }
