@@ -9,10 +9,12 @@ import loginService from './services/login'
 import blogService from './services/blogs'
 import { useNotify } from './NotifContext'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
+import { useUserDispatch, useUserValue } from './UserContext'
 
 const App = () => {
   const queryClient = useQueryClient()
-  const [user, setUser] = useState(null)
+  const user = useUserValue()
+  const userDispatch = useUserDispatch()
   const messager = useNotify()
 
   // login stuff
@@ -21,7 +23,7 @@ const App = () => {
     try {
       const rcvdUser = await loginService.login(credsObject)
       window.localStorage.setItem('LoggedInUser', JSON.stringify(rcvdUser))
-      setUser(rcvdUser)
+      userDispatch({type: 'LOGIN', payload: rcvdUser})
       messager('', 0)
     } catch (e) {
       messager('Wrong Credentials', 1)
@@ -34,7 +36,7 @@ const App = () => {
 
   const handleLogout = () => {
     window.localStorage.removeItem('LoggedInUser')
-    setUser(null)
+    userDispatch({type: 'LOGOUT'})
     messager('', 0)
   }
 
@@ -136,9 +138,9 @@ const App = () => {
   useEffect(() => {
     const loggedInUser = window.localStorage.getItem('LoggedInUser')
     if (loggedInUser) {
-      setUser(JSON.parse(loggedInUser))
+      userDispatch({type: 'LOGIN', payload: JSON.parse(loggedInUser)})
     }
-  }, [])
+  }, [userDispatch])
 
   // returns
 
