@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import Togglable from './components/Togglable'
 import LoginForm from './components/loginForm'
@@ -16,6 +16,15 @@ const App = () => {
   const user = useUserValue()
   const userDispatch = useUserDispatch()
   const messager = useNotify()
+
+  // effects
+
+  useEffect(() => {
+    const loggedInUser = window.localStorage.getItem('LoggedInUser')
+    if (loggedInUser) {
+      userDispatch({type: 'LOGIN', payload: JSON.parse(loggedInUser)})
+    }
+  }, [userDispatch])
 
   // login stuff
 
@@ -132,15 +141,6 @@ const App = () => {
       <BlogForm addNewBlog={addNewBlog} messager={messager} />
     </Togglable>
   )
-
-  // effects
-
-  useEffect(() => {
-    const loggedInUser = window.localStorage.getItem('LoggedInUser')
-    if (loggedInUser) {
-      userDispatch({type: 'LOGIN', payload: JSON.parse(loggedInUser)})
-    }
-  }, [userDispatch])
 
   // returns
 
